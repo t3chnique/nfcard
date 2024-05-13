@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Copy to Clipboard</title>
+    <script>
+        function copyToClipboard() {
+            // Get the text to copy
+            var textToCopy = "http://127.0.0.1:5000/videos/{{ filename }}";
+
+            // Create a temporary textarea element
+            var tempTextArea = document.createElement("textarea");
+            tempTextArea.value = textToCopy;
+            document.body.appendChild(tempTextArea);
+
+            // Select the text inside the textarea
+            tempTextArea.select();
+            tempTextArea.setSelectionRange(0, 99999); /* For mobile devices */
+
+            // Copy the selected text to the clipboard
+            document.execCommand("copy");
+
+            // Remove the temporary textarea
+            document.body.removeChild(tempTextArea);
+
+            // Show a confirmation message to the user
+            alert("Information copied to clipboard: " + textToCopy);
+        }
+    </script>
+</head>
+<body>
+    <h1>Its done!</h1>
+    <button onclick="copyToClipboard()">tap to copy your link</button>
+</form>
+<br><br><br>or you can
+<form action="/videos/{{ filename }}" method="POST"> 
+    <button type="submit">View your Video here</button>
+</form>
+</body>
+</html>
