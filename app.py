@@ -1,16 +1,29 @@
 import os
 import uuid
+# import requests
+import json
 from flask import (Flask, render_template, request,
                    redirect, url_for, send_from_directory)
 from datetime import datetime
 
-random_filename = str(uuid.uuid4())
+
+# random_filename = str(uuid.uuid4())
 current_date = datetime.now().strftime('%d.%m.%y')
 file_type = "video"
-file_name = f'{current_date}_{file_type}_{random_filename}'
+# file_name = f'{current_date}_{file_type}_{random_filename}'
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
+
+with open("main.json", "r", encoding="utf-8") as file:
+    ascii_json = json.load(file)
+keyboard = ascii_json["keyboard"]
+bj = ascii_json["bj"]
+police = ascii_json["police"]
+devider = ascii_json["devider"]
+kabluki = ascii_json["kabluki"]
+kabluki2 = ascii_json["kabluki2"]
+legla = ascii_json["legla"]
 
 
 def allowed_file(filename):
@@ -19,16 +32,15 @@ def allowed_file(filename):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', kabluki=kabluki)
 
 
 @app.route('/status')
 def status():
     message = ""
     message += "Hello!"
-    if file_name:
-        message += "<br>File_name: works"
-
+    if current_date:
+        message += "<br>current_date: works"
     return message
 
 
@@ -51,7 +63,7 @@ def get_total_files_size(folder):
 def upload_file():
     # Define the maximum allowed file size in bytes (e.g., 10 MB)
     MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024  # 10 MB
-    # Define the maximum allowed total folder size in bytes (e.g., 20 MB)
+    # Define the maximum allowed total folder size in bytes (e.g., 100 MB)
     MAX_FOLDER_SIZE_BYTES = 100 * 1024 * 1024  # 100 MB
 
     if 'file' not in request.files:
@@ -79,21 +91,39 @@ def upload_file():
                     f'({round(MAX_FILE_SIZE_BYTES/1024/1024)} MB)'
                     '<br>try video that is less 1 min lenghts')
 
-        filename = str(uuid.uuid4()) + '.mp4'
+        filename = current_date + file_type + str(uuid.uuid4()) + '.mp4'
+        # file_name = f'{current_date}_{file_type}_{random_filename}'
         file.seek(0)  # Reset file pointer to the beginning before saving
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        return redirect(url_for('user_menu', filename=filename))
+        '''
+        try:
+            user_ip = request.remote_addr
+            response = requests.get(f'http://ip-api.com/json/{user_ip}')
+            data = response.json()
+            e = " no"
+            txt_recorder(filename, user_ip, response, data, e)
+        except Exception as e:
+            txt_recorder(e)
+        information = '------------\nvideo uploaded'
+        txt_editor(filename, information)
+        '''
+        return redirect(url_for('congrats', filename=filename))
         # return redirect(url_for('play_video', filename=filename))
     else:
         return 'Invalid file type'
 
 
-@app.route('/user_menu/<filename>')
-def user_menu(filename):
-    return render_template('user_menu.html', filename=filename)
+@app.route('/congrats/<filename>')
+def congrats(filename):
+    return render_template('congrats.html', legla=legla, filename=filename)
 
 
 @app.route('/videos/<filename>', methods=['POST'])
+def play_video_now(filename):
+    return render_template('video.html', filename=filename)
+
+
+@app.route('/videos/<filename>')
 def play_video(filename):
     return render_template('video.html', filename=filename)
 
@@ -104,12 +134,26 @@ def uploaded_file(filename):
 
 
 '''
-@app.route('/mutant')
+def txt_recorder(filename, user_ip, response, data, e):
+    with open(f'{filename}.txt', 'w') as file:
+        # Write the text "hello world" to the file
+        file.write(f"hello, {user_ip}.\nresponse: {response}"
+                   f"\ndata:{data}\ne:{e}")
+
+
+def txt_editor(filename, information):
+    with open(f'{filename}.txt', 'a') as file:
+        # Write additional information to the file
+        file.write(f"\n{information}")
+'''
+
+
+@app.route('/11fc615-24c0-4d79-baf0-b9eb9c9dd3d6')
 def admin():
     # Get the list of files in the uploads folder
     upload_folder = app.config['UPLOAD_FOLDER']
     files = os.listdir(upload_folder)
-    return render_template('admin.html', files=files)
+    return render_template('admin.html', bj=bj, files=files)
 
 
 @app.route('/delete', methods=['POST'])
@@ -122,7 +166,6 @@ def delete_file():
         if os.path.exists(file_path):
             os.remove(file_path)
     return redirect(url_for('admin'))
-'''
 
 
 if __name__ == '__main__':

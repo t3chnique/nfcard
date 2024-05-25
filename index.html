@@ -4,6 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>nfcard</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+        h1, h3 {
+            text-align: center;
+            color: #222;
+        }
+        .ascii-art {
+            white-space: pre-wrap; /* Ensures that whitespace is preserved */
+            font-family: 'Courier New', monospace; /* Consistent font for ASCII art */
+            font-size: 7px; /* Adjust size as needed for alignment */
+            line-height: normal; /* Avoid extra space between lines */
+            margin: 20px auto;
+            width: 90%; /* Adjust width as needed */
+            text-align: left; /* Align text to the left */
+        }
+        button {
+            font-size: 16px;
+            padding: 10px 20px;
+            background-color: #666;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #555;
+        }
+        input[type="file"] {
+            display: block;
+            margin: 20px auto;
+            font-family: 'Courier New', monospace;
+            color: #333;
+        }
+        .my-link {
+            color: navy; /* Set the color of the link */
+            text-decoration: none; /* Remove underline */
+            font-size: 20px auto; /* Increase font size */
+        }
+        .my-link:hover {
+            color: red; /* Change color on hover */
+        }
+    </style>
 </head>
 <body>
     <h1>nfcard</h1>
@@ -12,9 +64,12 @@
         <input type="file" name="file" accept="video/mp4">
         <button type="submit">Upload</button>
     </form>
-    <br><br><br>or you can
+    <div style="text-align: center;">or you can</div>
     <form action="/example" method="POST"> 
         <button type="submit">View Example Video</button>
     </form>
+    <div class="ascii-art">
+        {{ kabluki }} nfcard 2024 <a href="https://www.example.com" class="my-link" target="_blank">terms of service</a>
+    </div>
 </body>
 </html>
