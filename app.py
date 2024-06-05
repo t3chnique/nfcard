@@ -2,6 +2,8 @@ import os
 import uuid
 # import requests
 import json
+# from flask_limiter import Limiter
+# from flask_limiter.util import get_remote_address
 from flask import (Flask, render_template, request,
                    redirect, url_for, send_from_directory)
 from datetime import datetime
@@ -13,6 +15,14 @@ file_type = "video"
 # file_name = f'{current_date}_{file_type}_{random_filename}'
 
 app = Flask(__name__)
+# Setup Flask-Limiter
+'''
+limiter = Limiter(
+    app,
+    key_func=get_remote_address,  # Use the user's IP address to track
+    default_limits=["2 per 5 minutes"]  # Set the rate limit
+)
+'''
 app.config['UPLOAD_FOLDER'] = 'uploads'
 
 with open("main.json", "r", encoding="utf-8") as file:
@@ -27,7 +37,18 @@ legla = ascii_json["legla"]
 
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() == 'mp4'
+    # Add other popular video formats as needed
+    ALLOWED_EXTENSIONS = {'avi', 'flv', 'wmv', 'mov', 'mp4',
+                          'm4v', 'mpeg', 'mpg', 'mkv', 'webm'}
+    return '.' in filename and filename.rsplit('.',
+                                               1)[1].lower(
+                                                   ) in ALLOWED_EXTENSIONS
+
+
+# Define the maximum allowed file size in bytes (e.g., 10 MB)
+MAX_FILE_SIZE_BYTES = 1000 * 1024 * 1024  # 1 GB
+# Define the maximum allowed total folder size in bytes (e.g., 100 MB)
+MAX_FOLDER_SIZE_BYTES = 10000 * 1024 * 1024  # 10 GB
 
 
 @app.route('/')
@@ -41,6 +62,11 @@ def status():
     message += "Hello!"
     if current_date:
         message += "<br>current_date: works"
+    if status:
+        message += ("<br>File size limit: "
+                    f"{round(MAX_FILE_SIZE_BYTES/1000000/1000)} GB, "
+                    "Folder size limit: "
+                    f"{round(MAX_FOLDER_SIZE_BYTES/1000000/1000)} GB")
     return message
 
 
@@ -61,11 +87,7 @@ def get_total_files_size(folder):
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    # Define the maximum allowed file size in bytes (e.g., 10 MB)
-    MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024  # 10 MB
-    # Define the maximum allowed total folder size in bytes (e.g., 100 MB)
-    MAX_FOLDER_SIZE_BYTES = 100 * 1024 * 1024  # 100 MB
-
+    error_message = "<br>try shorter video or text us (https://t.me/levaau)"
     if 'file' not in request.files:
         return redirect(request.url)
     file = request.files['file']
@@ -84,15 +106,14 @@ def upload_file():
             return ('The total size of uploaded files exceeds the '
                     'maximum allowed size '
                     f'({round(MAX_FOLDER_SIZE_BYTES/1024/1024)} MB)'
-                    '<br>try video that is less 1 min lenghts')
+                    f'{error_message}')
         # Check if the file size exceeds the maximum allowed size
         if new_file_size > MAX_FILE_SIZE_BYTES:
             return ('File size exceeds the maximum allowed size '
                     f'({round(MAX_FILE_SIZE_BYTES/1024/1024)} MB)'
-                    '<br>try video that is less 1 min lenghts')
+                    f'{error_message}')
 
         filename = current_date + file_type + str(uuid.uuid4()) + '.mp4'
-        # file_name = f'{current_date}_{file_type}_{random_filename}'
         file.seek(0)  # Reset file pointer to the beginning before saving
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         '''
@@ -148,7 +169,7 @@ def txt_editor(filename, information):
 '''
 
 
-@app.route('/11fc615-24c0-4d79-baf0-b9eb9c9dd3d6')
+@app.route('/11fc61524c04d79baf0b9eb9c9dd3d6')
 def admin():
     # Get the list of files in the uploads folder
     upload_folder = app.config['UPLOAD_FOLDER']
